@@ -11,49 +11,115 @@
   <button id="randomButton">Randomize</button>
   <hr>
   <p style="text-align: center;" id="card"></p>
-  <h1 style="text-align: center;" id="cardfront"></h1>
-  <h1 style="text-align: center;" id="cardback"></h1>
+    <h1 style="text-align: center;" id="cardpart1"></h1>
+  <h1 style="text-align: center;" id="cardpart2"></h1>
+  <h1 style="text-align: center;" id="cardpart3"></h1>
+  <h1 style="text-align: center;" id="cardpart4"></h1>
   <div style="text-align: center;">
-    <button id="revealButton">Reveal</button>
     <button id="plusButton">+</button>
+    <button id="revealButton">Reveal</button>
     <button id="minusButton">-</button>
   </div>
+
+  Show<label><input type="checkbox" id="cb1">1</label>
+  <label><input type="checkbox" id="cb2">2</label>
+  <label><input type="checkbox" id="cb3">3</label>
+  <label><input type="checkbox" id="cb4">4</label>
+
   <hr>
   <div style="text-align: center;">
     <button id="previousButton">←Previous</button>
     <button id="nextButton">Next→</button>
   </div>
   <hr>
+  <label><input type="checkbox" id="checkDebug">Debug</label>
   <pre id="debug"></pre>
   <script>
     let clickCount = 0;
-    const front = [];
-    const back = [];
+    let header1 = "1";
+    let header2 = "2";
+    let header3 = "3";
+    let header4 = "4";
+    const part1 = [];
+    const part2 = [];
+    const part3 = [];
+    const part4 = [];
     const mark = [];
     const map = [];
     const category = [];
     let loaded = false;
-    let blank = '*******';
+    let covered = '*******';
 
     function showCardInfo() {
 	document.getElementById('card').textContent = 'Item: ' + (clickCount+1) + ', Card: ' + (map[clickCount]+1) + ', Marks: ' + mark[map[clickCount]];
     }
 
-    function showCardFront() {
-	document.getElementById('cardfront').textContent = front[map[clickCount]];
+    function showCardPart1(show) {
+	const checkbox = document.getElementById("cb1");
+	if (part1[map[clickCount]].length>0) {
+	    if (show || checkbox.checked) {
+		document.getElementById('cardpart1').textContent = header1 + ': ' + part1[map[clickCount]];
+	    }
+	    else {
+		document.getElementById('cardpart1').textContent = header1 + ': ' + covered;
+	    }   
+	}
+	else {
+	    document.getElementById('cardpart1').textContent = '';
+	}
+    }
+	
+    function showCardPart2(show) {
+	const checkbox = document.getElementById("cb2");
+	if (part2[map[clickCount]].length>0) {
+	    if (show || checkbox.checked) {
+		document.getElementById('cardpart2').textContent = header2 + ': ' + part2[map[clickCount]];
+	    }
+	    else {
+		document.getElementById('cardpart2').textContent = header2 + ': ' + covered;
+	    }
+	}
+	else {
+	    document.getElementById('cardpart2').textContent = '';
+	}
     }
 
-    function showCardBack() {
-	document.getElementById('cardback').textContent = back[map[clickCount]];
+    function showCardPart3(show) {
+	const checkbox = document.getElementById("cb3");
+	if (part3[map[clickCount]].length>0) {
+	    if (show || checkbox.checked) {
+		document.getElementById('cardpart3').textContent = header3 + ': ' + part3[map[clickCount]];
+	    }
+	    else {
+		document.getElementById('cardpart3').textContent = header3 + ': ' + covered;
+	    }
+	}
+	else {
+	    document.getElementById('cardpart3').textContent = '';
+	}
     }
 
-    function showCardBackBlank() {
-	document.getElementById('cardback').textContent = blank;
+    function showCardPart4(show) {
+	const checkbox = document.getElementById("cb4");
+	if (part3[map[clickCount]].length>0) {
+	    if (show || checkbox.checked) {
+		document.getElementById('cardpart4').textContent = header4 + ': ' + part4[map[clickCount]];
+	    }
+	    else {
+		document.getElementById('cardpart4').textContent = header4 + ': ' + covered;
+	    }
+	}
+	else {
+	    document.getElementById('cardpart4').textContent = '';
+	}   
     }
-    
+
     document.getElementById('revealButton').addEventListener('click', function() {
 	if (loaded) {
-	    showCardBack();
+	    showCardPart1(true);
+	    showCardPart2(true);
+	    showCardPart3(true);
+	    showCardPart4(true);
 	}
     });
 
@@ -75,105 +141,202 @@
 	if (loaded) {
 	    clickCount--;
 	    if (clickCount<0) {
-		clickCount=front.length-1;
+		clickCount=part1.length-1;
 	    }	
 	    if (clickCount>=0) {
 		showCardInfo();
-		showCardFront();
-		showCardBackBlank();
+		showCardPart1();
+		showCardPart2();
+		showCardPart3();
+		showCardPart4();
 	    }
 	}
     });
 							   
-//    document.getElementById('randomButton').addEventListener('click', function() {
-//	if (loaded) {
-//	    clickCount=Math.floor(0.5+Math.random()*front.length);
-    //	    showCardInfo();
-//	    document.getElementById('cardfront').textContent = front[map[clickCount]];
-//	    document.getElementById('cardback').textContent = blank;
-//	}
-//    });
-
     document.getElementById('randomButton').addEventListener('click', function() {
 	if (loaded) {
-	    for (let i=0; i < front.length; i++) {
+	    for (let i=0; i < part1.length; i++) {
 		let temp=map[i];
-		let index=Math.floor(0.5+Math.random()*(front.length-1));
+		let index=Math.floor(0.5+Math.random()*(part1.length-1));
 		map[i]=map[index];
 		map[index]=temp;
 	    }
 
-	    document.getElementById('debug').textContent += '----------------------\r\n';
-	    document.getElementById('debug').textContent += 'Mapping\r\n';
-	    for (let i=0; i < front.length; i++) {
-		document.getElementById('debug').textContent += (i) + '.\t' + map[i] + '\r\n';
+	    printDebug('----------------------\r\n');
+	    printDebug('Randomized Mapping\r\n');
+	    for (let i=0; i < part1.length; i++) {
+		printDebug((i) + '.\t' + map[i] + '\r\n');
 	    }
 	    
 	    showCardInfo();
-	    showCardFront();
-	    showCardBackBlank();
+	    showCardPart1();
+	    showCardPart2();
+	    showCardPart3();
+	    showCardPart4();
 	}
     });
 
     document.getElementById('nextButton').addEventListener('click', function() {
 	if (loaded) {
 	    clickCount++;
-	    if (clickCount>=front.length) {
+	    if (clickCount>=part1.length) {
 		clickCount=0;
 	    }	
-	    if (clickCount<front.length) {
+	    if (clickCount<part1.length) {
 		showCardInfo();
-		showCardFront();
-		showCardBackBlank();
+		showCardPart1();
+		showCardPart2();
+		showCardPart3();
+		showCardPart4();
 	    }
 	}
     });
 
-    function readEntry(buffer) {
+    document.getElementById('cb1').addEventListener('change', function(e) {
+	showCardPart1();
+    });
+
+    document.getElementById('cb2').addEventListener('change', function(e) {
+	showCardPart2();
+    });
+
+    document.getElementById('cb3').addEventListener('change', function(e) {
+	showCardPart3();
+    });
+
+    document.getElementById('cb4').addEventListener('change', function(e) {
+	showCardPart4();
+    });
+
+    function printDebug(buffer) {
+	const checkbox = document.getElementById("checkDebug");
+	if (checkbox.checked) {
+	    document.getElementById('debug').textContent += buffer;
+	}
+    }
+    
+    function readData(buffer) {
 	let myString = '';
+	let elementCount=part1.length;
+	let counter=0;
+	let line=0;
+	let i=0;
+	printDebug('----------------------\r\n');
+	printDebug('Reading File\r\n');
+	for (let i=0; i < buffer.length; i++) {
+	    if (buffer[i] === ',') {
+		printDebug(elementCount + ':' + counter + ':' + myString + '\r\n');
+		
+		if (line<1) {
+		    if (counter === 0) {
+			header1=myString;
+		    }
+		    else if (counter === 1) {
+			header2=myString;
+		    }
+		    else if (counter === 2) {
+			header3=myString;
+		    }
+		    else if (counter === 3) {
+			header4=myString;
+		    }
+		}
+		else {
+		    if (counter === 0) {
+			mark.push(0);
+			map.push(elementCount);
+			part1.push(myString);
+			part2.push("");
+			part3.push("");
+			part4.push("");
+		    }
+		    else if (counter === 1) {
+			part2[elementCount]=myString;
+		    }
+		    else if (counter === 2) {
+			part3[elementCount]=myString;
+		    }
+		    else if (counter === 3) {
+			part4[elementCount]=myString;
+		    }
+		}
+		counter++;
+		myString='';
+	    }
+	    else if (buffer[i] === '\n') {
+		printDebug(elementCount + ':' + counter + ':' + myString + '\r\n');
+		if (line<1) {
+		    if (counter === 0) {
+			header1=myString;
+		    }
+		    else if (counter === 1) {
+			header2=myString;
+		    }
+		    else if (counter === 2) {
+			header3=myString;
+		    }
+		    else if (counter === 3) {
+			header4=myString;
+		    }
+		}
+		else {
+		    if (counter === 0) {
+			mark.push(0);
+			map.push(elementCount);
+			part1.push(myString);
+			part2.push("b");
+			part3.push("c");
+			part4.push("d");
+		    }
+		    else if (counter === 1) {
+			part2[elementCount]=myString;
+		    }
+		    else if (counter === 2) {
+			part3[elementCount]=myString;
+		    }
+		    else if (counter === 3) {
+			part4[elementCount]=myString;
+		    }
+		    elementCount++;
+		}
+		counter=0;
+		myString='';
+		line++;
+	    }
+	    else {
+		myString += buffer[i];
+	    }
+	}
 	return(myString);
     }
     
     document.getElementById('fileInput').addEventListener('change', function(e) {
-	let count=front.length;
+	let count=part1.length;
 	const file = e.target.files[0];
 	const reader = new FileReader();
 	reader.onload = function(e) {
             const text = e.target.result;
-	    let myString = '';
-	    for (let i=0; i < text.length; i++) {
-		if (text[i] === ',') {
-		    mark.push(0);
-		    map.push(count++);
-		    front.push(myString);
-		    myString = '';
-		}
-		else if (text[i] === '\n') {
-		    back.push(myString);
-		    myString = '';		    
-		}
-		else
-		{
-		    myString += text[i];
-		}
-	    }	    
+	    readData(text);
 
-	    document.getElementById('debug').textContent += '----------------------\r\n';
-	    document.getElementById('debug').textContent += 'Cards\r\n';
-	    for (let i=0; i < front.length; i++) {
-		document.getElementById('debug').textContent += (i+1) + '.\t' + front[i] + '\t:\t' + back[i] +'\r\n';
+	    printDebug('----------------------\r\n');
+	    printDebug('Cards\r\n');
+	    for (let i=0; i < part1.length; i++) {
+		printDebug((i+1) + '.\t' + part1[i] + '\t:\t' + part2[i] + '\t:\t');
+		printDebug(part3[i] + '\t:\t' + part4[i] + '\r\n');
 	    }
-	    document.getElementById('debug').textContent += '----------------------\r\n';
-	    document.getElementById('debug').textContent += 'Mapping\r\n';
-	    for (let i=0; i < front.length; i++) {
-		document.getElementById('debug').textContent += (i) + '.\t' + map[i] + '\r\n';
+	    printDebug('----------------------\r\n');
+	    printDebug('Mapping\r\n');
+	    for (let i=0; i < part1.length; i++) {
+		printDebug((i) + '.\t' + map[i] + '\r\n');
 	    }
 	    loaded=true;
 	    document.getElementById('status').textContent = 'File loaded.';
 	    clickCount=0;
 	    showCardInfo();
-	    showCardFront();
-	    showCardBackBlank();
+	    showCardPart1();
+	    showCardPart2();
+	    showCardPart3();
+	    showCardPart4();
 	};
 	reader.readAsText(file);
     });
