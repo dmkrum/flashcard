@@ -1,0 +1,7 @@
+symbol,translation
+我,I
+你,you
+他,he
+她,she
+牠,it
+是,to be

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Card File Reader</title>
+</head>
+<body>
+  <h1>Card File Reader</h1>
+  <p id="status">No File Loaded</p>
+  <input type="file" id="fileInput" accept=".txt,.csv">
+  <button id="randomButton">Randomize</button>
+  <hr>
+  <p style="text-align: center;" id="card"></p>
+  <h1 style="text-align: center;" id="cardfront"></h1>
+  <h1 style="text-align: center;" id="cardback"></h1>
+  <div style="text-align: center;">
+    <button id="revealButton">Reveal</button>
+    <button id="plusButton">+</button>
+    <button id="minusButton">-</button>
+  </div>
+  <hr>
+  <div style="text-align: center;">
+    <button id="previousButton">←Previous</button>
+    <button id="nextButton">Next→</button>
+  </div>
+  <hr>
+  <pre id="debug"></pre>
+  <script>
+    let clickCount = 0;
+    const front = [];
+    const back = [];
+    const mark = [];
+    const map = [];
+    const category = [];
+    let loaded = false;
+    let blank = '*******';
+
+    function showCardInfo() {
+	document.getElementById('card').textContent = 'Item: ' + (clickCount+1) + ', Card: ' + (map[clickCount]+1) + ', Marks: ' + mark[map[clickCount]];
+    }
+
+    function showCardFront() {
+	document.getElementById('cardfront').textContent = front[map[clickCount]];
+    }
+
+    function showCardBack() {
+	document.getElementById('cardback').textContent = back[map[clickCount]];
+    }
+
+    function showCardBackBlank() {
+	document.getElementById('cardback').textContent = blank;
+    }
+    
+    document.getElementById('revealButton').addEventListener('click', function() {
+	if (loaded) {
+	    showCardBack();
+	}
+    });
+
+    document.getElementById('plusButton').addEventListener('click', function() {
+	if (loaded) {
+	    mark[map[clickCount]]++;
+	    showCardInfo();
+	}
+    });
+
+    document.getElementById('minusButton').addEventListener('click', function() {
+	if (loaded) {
+	    mark[map[clickCount]]--;
+	    showCardInfo();
+	}
+    });
+
+    document.getElementById('previousButton').addEventListener('click', function() {
+	if (loaded) {
+	    clickCount--;
+	    if (clickCount<0) {
+		clickCount=front.length-1;
+	    }	
+	    if (clickCount>=0) {
+		showCardInfo();
+		showCardFront();
+		showCardBackBlank();
+	    }
+	}
+    });
+							   
+//    document.getElementById('randomButton').addEventListener('click', function() {
+//	if (loaded) {
+//	    clickCount=Math.floor(0.5+Math.random()*front.length);
+    //	    showCardInfo();
+//	    document.getElementById('cardfront').textContent = front[map[clickCount]];
+//	    document.getElementById('cardback').textContent = blank;
+//	}
+//    });
+
+    document.getElementById('randomButton').addEventListener('click', function() {
+	if (loaded) {
+	    for (let i=0; i < front.length; i++) {
+		let temp=map[i];
+		let index=Math.floor(0.5+Math.random()*(front.length-1));
+		map[i]=map[index];
+		map[index]=temp;
+	    }
+
+	    document.getElementById('debug').textContent += '----------------------\r\n';
+	    document.getElementById('debug').textContent += 'Mapping\r\n';
+	    for (let i=0; i < front.length; i++) {
+		document.getElementById('debug').textContent += (i) + '.\t' + map[i] + '\r\n';
+	    }
+	    
+	    showCardInfo();
+	    showCardFront();
+	    showCardBackBlank();
+	}
+    });
+
+    document.getElementById('nextButton').addEventListener('click', function() {
+	if (loaded) {
+	    clickCount++;
+	    if (clickCount>=front.length) {
+		clickCount=0;
+	    }	
+	    if (clickCount<front.length) {
+		showCardInfo();
+		showCardFront();
+		showCardBackBlank();
+	    }
+	}
+    });
+
+    function readEntry(buffer) {
+	let myString = '';
+	return(myString);
+    }
+    
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+	let count=front.length;
+	const file = e.target.files[0];
+	const reader = new FileReader();
+	reader.onload = function(e) {
+            const text = e.target.result;
+	    let myString = '';
+	    for (let i=0; i < text.length; i++) {
+		if (text[i] === ',') {
+		    mark.push(0);
+		    map.push(count++);
+		    front.push(myString);
+		    myString = '';
+		}
+		else if (text[i] === '\n') {
+		    back.push(myString);
+		    myString = '';		    
+		}
+		else
+		{
+		    myString += text[i];
+		}
+	    }	    
+
+	    document.getElementById('debug').textContent += '----------------------\r\n';
+	    document.getElementById('debug').textContent += 'Cards\r\n';
+	    for (let i=0; i < front.length; i++) {
+		document.getElementById('debug').textContent += (i+1) + '.\t' + front[i] + '\t:\t' + back[i] +'\r\n';
+	    }
+	    document.getElementById('debug').textContent += '----------------------\r\n';
+	    document.getElementById('debug').textContent += 'Mapping\r\n';
+	    for (let i=0; i < front.length; i++) {
+		document.getElementById('debug').textContent += (i) + '.\t' + map[i] + '\r\n';
+	    }
+	    loaded=true;
+	    document.getElementById('status').textContent = 'File loaded.';
+	    clickCount=0;
+	    showCardInfo();
+	    showCardFront();
+	    showCardBackBlank();
+	};
+	reader.readAsText(file);
+    });
+  </script>
+</body>
+</html>
